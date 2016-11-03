@@ -20,9 +20,12 @@ struct ParameterContents {
     Expr extent_constraint[4];
     Expr stride_constraint[4];
     Expr min_value, max_value;
+    Expr estimate;
+
     const bool is_buffer;
     const bool is_explicit_name;
     const bool is_registered;
+
     ParameterContents(Type t, bool b, int d, const std::string &n, bool e, bool r)
         : type(t), dimensions(d), name(n), buffer(BufferPtr()), data(0), 
           host_alignment(t.bytes()), is_buffer(b), is_explicit_name(e), is_registered(r) {
@@ -270,6 +273,21 @@ void Parameter::set_max_value(Expr e) {
 Expr Parameter::get_max_value() const {
     check_is_scalar();
     return contents->max_value;
+}
+
+void Parameter::estimate(Expr e) {
+    check_is_scalar();
+    contents->estimate = e;
+}
+
+bool Parameter::has_estimate() const {
+    check_is_scalar();
+    return contents->estimate.defined();
+}
+
+Expr Parameter::get_estimate() const {
+    check_is_scalar();
+    return contents->estimate;
 }
 
 void check_call_arg_types(const std::string &name, std::vector<Expr> *args, int dims) {

@@ -89,6 +89,8 @@ struct ScheduleContents {
     std::vector<StorageDim> storage_dims;
     std::vector<Bound> bounds;
     std::vector<Prefetch> prefetches;
+    std::vector<Bound> estimates;
+
     std::map<std::string, IntrusivePtr<Internal::FunctionContents>> wrappers;
     bool memoized;
     bool touched;
@@ -130,6 +132,14 @@ struct ScheduleContents {
                 p.offset = mutator->mutate(p.offset);
             }
         }
+        for (Bound &b : estimates) {
+            if (b.min.defined()) {
+                b.min = mutator->mutate(b.min);
+            }
+            if (b.extent.defined()) {
+                b.extent = mutator->mutate(b.extent);
+            }
+        }
     }
 };
 
@@ -159,6 +169,7 @@ Schedule Schedule::deep_copy(
     copy.contents->storage_dims = contents->storage_dims;
     copy.contents->bounds = contents->bounds;
     copy.contents->prefetches = contents->prefetches;
+    copy.contents->estimates = contents->estimates;
     copy.contents->memoized = contents->memoized;
     copy.contents->touched = contents->touched;
     copy.contents->allow_race_conditions = contents->allow_race_conditions;
@@ -223,6 +234,10 @@ std::vector<Bound> &Schedule::bounds() {
     return contents->bounds;
 }
 
+std::vector<Bound> &Schedule::estimates() {
+    return contents->estimates;
+}
+
 const std::vector<Bound> &Schedule::bounds() const {
     return contents->bounds;
 }
@@ -235,6 +250,10 @@ const std::vector<Prefetch> &Schedule::prefetches() const {
     return contents->prefetches;
 }
 
+const std::vector<Bound> &Schedule::estimates() const {
+    return contents->estimates;
+}
+ 
 std::vector<ReductionVariable> &Schedule::rvars() {
     return contents->rvars;
 }
@@ -321,6 +340,14 @@ void Schedule::accept(IRVisitor *visitor) const {
             p.offset.accept(visitor);
         }
     }
+    for (const Bound &b : estimates()) {
+        if (b.min.defined()) {
+            b.min.accept(visitor);
+        }
+        if (b.extent.defined()) {
+            b.extent.accept(visitor);
+        }
+    }
 }
 
 void Schedule::mutate(IRMutator *mutator) {
@@ -331,4 +358,3 @@ void Schedule::mutate(IRMutator *mutator) {
 
 }  // namespace Internal
 }  // namespace Halide
-

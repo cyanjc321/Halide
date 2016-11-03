@@ -342,6 +342,8 @@ set(HEADER_FILES
   WrapCalls.h
   runtime/HalideRuntime.h
   runtime/HalideBuffer.h
+  AutoSchedule.h
+  RegionCosts.h
 )
 
 file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/include")
@@ -489,6 +491,8 @@ add_library(Halide ${HALIDE_LIBRARY_TYPE}
   VaryingAttributes.cpp
   VectorizeLoops.cpp
   WrapCalls.cpp
+  AutoSchedule.cpp
+  RegionCosts.cpp
   ${BITWRITER_FILES}
   "${CMAKE_BINARY_DIR}/include/Halide.h"
   ${HEADER_FILES}
